@@ -1,9 +1,17 @@
+```yaml
 name: CI
 
 on:
   push:
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -28,6 +36,11 @@ jobs:
         image: redis:7
         ports:
           - "6379:6379"
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
 
     env:
       DATABASE_URL: postgresql+psycopg://amrutam:test_password@localhost:5432/amrutam
@@ -45,7 +58,12 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt email-validator
+        run: python -m pip install -r requirements.txt
+
+      - name: Check dependency vulnerabilities
+        run: |
+          python -m pip install pip-audit
+          pip-audit -r requirements.txt
 
       - name: Run database migrations
         run: alembic upgrade head
@@ -53,8 +71,9 @@ jobs:
       - name: Run lint checks
         run: ruff check app tests
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: pytest --cov=app --cov-report=term-missing
 
       - name: Build Docker image
         run: docker build -t amrutam-api:${{ github.sha }} .
+```
