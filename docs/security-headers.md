@@ -1,0 +1,1 @@
+Production ingress should set HSTS, X-Content-Type-Options, Referrer-Policy, and a restrictive Content-Security-Policy appropriate to the client. TLS termination, certificates, and secure cookie settings depend on the deployment environment.

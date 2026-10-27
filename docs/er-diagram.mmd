@@ -1,0 +1,75 @@
+erDiagram
+    USERS ||--o| DOCTORS : has
+    USERS ||--o{ CONSULTATIONS : books
+    DOCTORS ||--o{ AVAILABILITY_SLOTS : publishes
+    DOCTORS ||--o{ CONSULTATIONS : attends
+    AVAILABILITY_SLOTS ||--o| CONSULTATIONS : reserves
+    CONSULTATIONS ||--o{ PRESCRIPTIONS : generates
+    CONSULTATIONS ||--o{ PAYMENTS : has
+    USERS ||--o{ AUDIT_LOGS : performs
+    USERS ||--o{ IDEMPOTENCY_RECORDS : owns
+    USERS ||--o{ REFRESH_TOKENS : receives
+    USERS {
+      uuid id PK
+      string email UK
+      string password_hash
+      string role
+      string full_name
+      boolean is_active
+    }
+    DOCTORS {
+      uuid id PK
+      uuid user_id FK
+      string specialization
+      string license_number UK
+      boolean verified
+    }
+    AVAILABILITY_SLOTS {
+      uuid id PK
+      uuid doctor_id FK
+      datetime starts_at
+      datetime ends_at
+      string status
+    }
+    CONSULTATIONS {
+      uuid id PK
+      uuid patient_id FK
+      uuid doctor_id FK
+      uuid slot_id FK
+      string status
+      string reason
+    }
+    PRESCRIPTIONS {
+      uuid id PK
+      uuid consultation_id FK
+      uuid doctor_id FK
+      uuid patient_id FK
+      string content
+    }
+    PAYMENTS {
+      uuid id PK
+      uuid consultation_id FK
+      integer amount_minor
+      string currency
+      string status
+    }
+    AUDIT_LOGS {
+      uuid id PK
+      uuid actor_id FK
+      string action
+      string resource_type
+      string resource_id
+    }
+    IDEMPOTENCY_RECORDS {
+      uuid id PK
+      uuid actor_id FK
+      string key
+      string request_hash
+    }
+    REFRESH_TOKENS {
+      uuid id PK
+      uuid user_id FK
+      string token_hash
+      datetime expires_at
+      datetime revoked_at
+    }

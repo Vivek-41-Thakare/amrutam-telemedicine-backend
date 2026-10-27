@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor Patient
+    participant API as FastAPI
+    participant DB as PostgreSQL
+    Patient->>API: POST /consultations + Idempotency-Key
+    API->>API: Authenticate, authorize, validate, hash request
+    API->>DB: Begin transaction / serialize idempotency key
+    API->>DB: Lock availability slot FOR UPDATE
+    DB-->>API: Current slot state
+    API->>API: Check availability and verified doctor
+    API->>DB: Insert consultation + idempotency result + audit event
+    API->>DB: Mark slot BOOKED
+    API->>DB: COMMIT
+    API-->>Patient: 201 Created
+    Note over API,DB: Duplicate request replays stored response; key with changed payload returns 409
