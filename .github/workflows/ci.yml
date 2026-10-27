@@ -43,15 +43,18 @@ steps:
       python-version: "3.12"
       cache: pip
 
-  - run: pip install -r requirements.txt email-validator
+  - name: Install dependencies
+    run: pip install -r requirements.txt email-validator
 
   - name: Run database migrations
     run: alembic upgrade head
 
-  - run: ruff check app tests
+  - name: Run lint checks
+    run: ruff check app tests
 
-  - run: pytest --cov=app --cov-report=term-missing
+  - name: Run tests
+    run: pytest --cov=app --cov-report=term-missing
 
-  - run: docker build -t amrutam-api:${{ github.sha }} .
-
+  - name: Build Docker image
+    run: docker build -t amrutam-api:${{ github.sha }} .
 
