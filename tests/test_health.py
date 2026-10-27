@@ -21,6 +21,7 @@ def test_protected_endpoint_requires_authentication():
     response = client.get("/api/v1/users/me")
     assert response.status_code == 401
 
+
 def test_invalid_token_is_rejected():
     response = client.get(
         "/api/v1/users/me",
@@ -41,4 +42,4 @@ def test_patient_cannot_access_admin_analytics():
         "/api/v1/admin/analytics/consultations",
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert response.status_code == 401    
+    assert response.status_code == 401
