@@ -1,60 +1,60 @@
 name: CI
 
 on:
-push:
-pull_request:
-workflow_dispatch:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-test:
-runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: amrutam
+          POSTGRES_USER: amrutam
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U amrutam -d amrutam"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
-services:
-  postgres:
-    image: postgres:16
+      redis:
+        image: redis:7
+        ports:
+          - "6379:6379"
+
     env:
-      POSTGRES_DB: amrutam
-      POSTGRES_USER: amrutam
-      POSTGRES_PASSWORD: test_password
-    ports:
-      - 5432:5432
-    options: >-
-      --health-cmd "pg_isready -U amrutam -d amrutam"
-      --health-interval 5s
-      --health-timeout 5s
-      --health-retries 10
+      DATABASE_URL: postgresql+psycopg://amrutam:test_password@localhost:5432/amrutam
+      JWT_SECRET_KEY: test-only-secret-that-is-long-enough-to-be-replaced
+      REDIS_URL: redis://localhost:6379/0
 
-  redis:
-    image: redis:7
-    ports:
-      - 6379:6379
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-env:
-  DATABASE_URL: postgresql+psycopg://amrutam:test_password@localhost:5432/amrutam
-  JWT_SECRET_KEY: test-only-secret-that-is-long-enough-to-be-replaced
-  REDIS_URL: redis://localhost:6379/0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
 
-steps:
-  - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install -r requirements.txt email-validator
 
-  - uses: actions/setup-python@v5
-    with:
-      python-version: "3.12"
-      cache: pip
+      - name: Run database migrations
+        run: alembic upgrade head
 
-  - name: Install dependencies
-    run: pip install -r requirements.txt email-validator
+      - name: Run lint checks
+        run: ruff check app tests
 
-  - name: Run database migrations
-    run: alembic upgrade head
+      - name: Run tests
+        run: pytest --cov=app --cov-report=term-missing
 
-  - name: Run lint checks
-    run: ruff check app tests
-
-  - name: Run tests
-    run: pytest --cov=app --cov-report=term-missing
-
-  - name: Build Docker image
-    run: docker build -t amrutam-api:${{ github.sha }} .
-
+      - name: Build Docker image
+        run: docker build -t amrutam-api:${{ github.sha }} .
