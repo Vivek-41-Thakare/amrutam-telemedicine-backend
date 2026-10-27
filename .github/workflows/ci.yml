@@ -1,4 +1,3 @@
-```yaml
 name: CI
 
 on:
@@ -76,4 +75,3 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t amrutam-api:${{ github.sha }} .
-```
