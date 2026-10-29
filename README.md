@@ -1,5 +1,5 @@
 # Amrutam Telemedicine Backend
-efrg
+
 A Python/FastAPI + PostgreSQL + Redis starter for a telemedicine backend engineering assignment. It includes initial user authentication, role checks, doctor profiles, availability, transactional consultation booking with a PostgreSQL-backed idempotency record, consultation lifecycle, prescriptions, audit events, Docker Compose, OpenAPI, starter tests, CI, and design/security documents.
 
 > **Important:** This is an assignment starter, not a certified or production-approved healthcare system. Do not use real patient data or expose it publicly until the production checklist is completed and independently reviewed. MFA, full refresh-token lifecycle, production rate limiting, payment-provider integration, complete metrics/tracing instrumentation, and cloud Terraform resources are not fully implemented yet.
